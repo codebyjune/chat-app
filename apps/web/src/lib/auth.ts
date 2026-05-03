@@ -18,6 +18,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000
 const ACCESS_TOKEN_KEY = 'accessToken'
 const USER_KEY = 'user'
 
+const canUseBrowserStorage = () => typeof window !== 'undefined' && typeof localStorage !== 'undefined'
+
 const getErrorMessage = async (response: Response) => {
   let payload: ErrorPayload | null = null
 
@@ -72,14 +74,17 @@ export const login = async (input: { email: string; password: string }) => {
   }
 
   const data = await response.json() as LoginResponse
-  localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken)
-  localStorage.setItem(USER_KEY, JSON.stringify(data.user))
+
+  if (canUseBrowserStorage()) {
+    localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken)
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user))
+  }
 
   return data
 }
 
 export const fetchProfile = async () => {
-  const token = localStorage.getItem(ACCESS_TOKEN_KEY)
+  const token = canUseBrowserStorage() ? localStorage.getItem(ACCESS_TOKEN_KEY) : null
 
   if (!token) {
     throw new Error('未登录')
@@ -96,13 +101,16 @@ export const fetchProfile = async () => {
   }
 
   const user = await response.json() as AuthUser
-  localStorage.setItem(USER_KEY, JSON.stringify(user))
+
+  if (canUseBrowserStorage()) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user))
+  }
 
   return user
 }
 
 export const updateProfile = async (input: { username: string; email: string }) => {
-  const token = localStorage.getItem(ACCESS_TOKEN_KEY)
+  const token = canUseBrowserStorage() ? localStorage.getItem(ACCESS_TOKEN_KEY) : null
 
   if (!token) {
     throw new Error('未登录')
@@ -122,14 +130,22 @@ export const updateProfile = async (input: { username: string; email: string }) 
   }
 
   const user = await response.json() as AuthUser
-  localStorage.setItem(USER_KEY, JSON.stringify(user))
+
+  if (canUseBrowserStorage()) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user))
+  }
 
   return user
 }
 
-export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY)
+export const getAccessToken = () =>
+  canUseBrowserStorage() ? localStorage.getItem(ACCESS_TOKEN_KEY) : null
 
 export const getStoredUser = () => {
+  if (!canUseBrowserStorage()) {
+    return null
+  }
+
   const rawUser = localStorage.getItem(USER_KEY)
 
   if (!rawUser) {
@@ -147,6 +163,10 @@ export const getStoredUser = () => {
 export const isAuthenticated = () => Boolean(getAccessToken())
 
 export const logout = () => {
+  if (!canUseBrowserStorage()) {
+    return
+  }
+
   localStorage.removeItem(ACCESS_TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
 }

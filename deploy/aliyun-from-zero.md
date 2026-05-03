@@ -206,6 +206,41 @@ tar -xzf chat-project.tar.gz
 sudo chown -R admin:admin /var/www/chat-project
 ```
 
+### 重要提醒
+
+如果你本地代码刚改过，比如：
+
+1. `/chat/` 子路径部署支持
+2. `vite.config.ts` 使用 `loadEnv` 读取 `.env.production`
+3. Socket.IO 路径支持 `/chat-api/socket.io`
+
+那你必须把最新代码重新上传到服务器后，再执行构建。
+
+否则服务器上虽然 `.env.production` 是新的，但代码还是旧的，构建产物仍然可能不对。
+
+最直接的判断方法：
+
+```bash
+cat /var/www/chat-project/apps/web/vite.config.ts
+```
+
+你应该看到类似：
+
+```ts
+import { defineConfig, loadEnv } from 'vite'
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return {
+    base: env.VITE_APP_BASE_PATH ?? '/',
+    plugins: [vue(), tailwindcss()],
+  }
+})
+```
+
+如果服务器上不是这个版本，就说明还没同步到最新代码。
+
 ## 九、配置后端环境变量
 
 进入后端目录：

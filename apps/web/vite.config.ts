@@ -5,9 +5,10 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const appBasePath = env.VITE_APP_BASE_PATH || '/'
 
   return {
-    base: env.VITE_APP_BASE_PATH ?? '/',
+    base: appBasePath,
     plugins: [vue(), tailwindcss()],
   }
 })

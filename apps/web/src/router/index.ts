@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { isAuthenticated } from '../lib/auth'
 
+const routerBase = import.meta.env.VITE_ROUTER_BASE_PATH ?? '/'
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(routerBase),
   routes: [
     {
       path: '/',

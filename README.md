@@ -35,7 +35,10 @@ chat-project/
 复制 `apps/web/.env.example` 为 `apps/web/.env`：
 
 ```env
+VITE_APP_BASE_PATH=/
+VITE_ROUTER_BASE_PATH=/
 VITE_API_BASE_URL=http://localhost:3000
+VITE_SOCKET_PATH=/socket.io
 ```
 
 ### 后端
@@ -75,6 +78,44 @@ pnpm start:dev
 
 - 前端：`pnpm build`
 - 后端：`pnpm build`
+
+## 无域名部署
+
+如果暂时没有域名，可以把聊天项目挂在服务器 IP 的子路径下：
+
+- 前端：`http://服务器IP/chat/`
+- 后端接口：`http://服务器IP/chat-api/`
+
+前端生产环境变量可参考 `apps/web/.env.production.ip.example`。
+
+Nginx 示例：
+
+```nginx
+location /chat/ {
+    alias /var/www/chat-project/apps/web/dist/;
+    try_files $uri $uri/ /chat/index.html;
+}
+
+location /chat-api/ {
+    proxy_pass http://127.0.0.1:3001/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_cache_bypass $http_upgrade;
+}
+
+location /chat-api/socket.io/ {
+    proxy_pass http://127.0.0.1:3001/socket.io/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_cache_bypass $http_upgrade;
+}
+```
 
 ## 已完成的项目补强
 

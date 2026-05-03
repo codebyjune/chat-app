@@ -2,6 +2,7 @@ import { io, type Socket } from 'socket.io-client'
 import { getAccessToken } from './auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+const SOCKET_PATH = import.meta.env.VITE_SOCKET_PATH ?? '/socket.io'
 
 type ApiErrorPayload = {
   message?: string | string[]
@@ -144,6 +145,7 @@ export const createChatSocket = () => {
   }
 
   return io(API_BASE_URL, {
+    path: SOCKET_PATH,
     auth: {
       token,
     },

@@ -39,8 +39,6 @@ export class ChatGateway
   @WebSocketServer()
   server: Server;
 
-  private readonly userSocketCounts = new Map<number, number>();
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -63,31 +61,13 @@ export class ChatGateway
       };
 
       await client.join(this.getUserRoom(payload.sub));
-      this.trackUserConnection(payload.sub);
-      this.server
-        .to(this.getUserRoom(payload.sub))
-        .emit('presence:update', { userId: payload.sub, online: true });
     } catch {
       client.emit('chat:error', { message: 'Unauthorized' });
       client.disconnect();
     }
   }
 
-  handleDisconnect(client: AuthenticatedSocket) {
-    const userId = client.data.user?.userId;
-
-    if (!userId) {
-      return;
-    }
-
-    const isStillOnline = this.trackUserDisconnection(userId);
-
-    if (!isStillOnline) {
-      this.server
-        .to(this.getUserRoom(userId))
-        .emit('presence:update', { userId, online: false });
-    }
-  }
+  handleDisconnect(_client: AuthenticatedSocket) {}
 
   @UsePipes(
     new ValidationPipe({
@@ -149,27 +129,6 @@ export class ChatGateway
     return updatedMessages;
   }
 
-  @SubscribeMessage('presence:sync')
-  handlePresenceSync(
-    @MessageBody() body: { userIds: number[] },
-    @ConnectedSocket() client: AuthenticatedSocket,
-  ) {
-    if (!client.data.user) {
-      throw new UnauthorizedException('Unauthorized');
-    }
-
-    const userIds = Array.isArray(body?.userIds)
-      ? [...new Set(body.userIds.filter((userId) => Number.isInteger(userId)))]
-      : [];
-
-    return {
-      users: userIds.map((userId) => ({
-        userId,
-        online: this.userSocketCounts.has(userId),
-      })),
-    };
-  }
-
   private extractToken(client: Socket): string {
     const token = client.handshake.auth.token;
 
@@ -182,21 +141,5 @@ export class ChatGateway
 
   private getUserRoom(userId: number): string {
     return `user:${userId}`;
-  }
-
-  private trackUserConnection(userId: number) {
-    this.userSocketCounts.set(userId, (this.userSocketCounts.get(userId) ?? 0) + 1);
-  }
-
-  private trackUserDisconnection(userId: number): boolean {
-    const nextCount = (this.userSocketCounts.get(userId) ?? 1) - 1;
-
-    if (nextCount <= 0) {
-      this.userSocketCounts.delete(userId);
-      return false;
-    }
-
-    this.userSocketCounts.set(userId, nextCount);
-    return true;
   }
 }

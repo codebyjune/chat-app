@@ -8,7 +8,6 @@ import type { UiMessage } from '../types/chat-ui'
 const props = defineProps<{
   currentUser: AuthUser | null;
   selectedFriend: FriendListItem | null;
-  selectedFriendOnline: boolean;
   messages: UiMessage[];
   draftMessage: string;
   sendError: string;
@@ -55,7 +54,6 @@ defineExpose({
                 : '私聊'
             }}
           </div>
-          <span v-if="props.selectedFriend" class="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2" style="border-color: var(--bg-surface)" :class="props.selectedFriendOnline ? 'bg-[#22C55E]' : 'bg-[#D1D5DB]'" />
         </div>
 
         <div>
@@ -68,9 +66,6 @@ defineExpose({
             {{
               props.selectedFriend ? props.selectedFriend.friend.email : '登录后可开始聊天'
             }}
-          </p>
-          <p v-if="props.selectedFriend" class="mt-1 text-xs" :class="props.selectedFriendOnline ? 'text-[#16A34A]' : ''" :style="props.selectedFriendOnline ? undefined : { color: 'var(--text-secondary)' }">
-            {{ props.selectedFriendOnline ? '在线' : '离线' }}
           </p>
         </div>
       </div>
@@ -117,8 +112,6 @@ defineExpose({
               style="background: var(--bg-avatar); color: var(--text-primary)">
               {{ message.from.slice(0, 2).toUpperCase() }}
             </div>
-            <span v-if="message.online" class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 "
-              style="border-color: var(--bg-surface)" />
           </div>
 
           <div>

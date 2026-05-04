@@ -145,9 +145,7 @@ export const createChatSocket = () => {
     throw new Error('未登录')
   }
 
-  const resolvedSocketBaseUrl =
-    SOCKET_BASE_URL ??
-    (typeof window !== 'undefined' ? window.location.origin : API_BASE_URL)
+  const resolvedSocketBaseUrl = SOCKET_BASE_URL ?? (typeof window !== 'undefined' ? window.location.origin : API_BASE_URL)
 
   return io(resolvedSocketBaseUrl, {
     path: SOCKET_PATH,

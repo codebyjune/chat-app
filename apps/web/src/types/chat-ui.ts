@@ -19,7 +19,6 @@ export type UiMessage = {
   text: string
   self: boolean
   time: string
-  online?: boolean
   read: boolean
 }
 

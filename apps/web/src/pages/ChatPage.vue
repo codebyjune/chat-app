@@ -45,7 +45,6 @@ const conversationMap = ref<Record<number, ChatMessage[]>>({})
 const unreadCountMap = ref<Record<number, number>>({})
 const conversationHasMoreMap = ref<Record<number, boolean>>({})
 const historyLoadingMap = ref<Record<number, boolean>>({})
-const onlineStatusMap = ref<Record<number, boolean>>({})
 const conversationPageSize = 20
 
 const formatTime = (value: string) => {
@@ -62,7 +61,6 @@ const formatTime = (value: string) => {
 }
 
 const selectedFriend = computed(() => friends.value.find((item) => item.friend.id === selectedFriendId.value) ?? null)
-const selectedFriendOnline = computed(() => selectedFriendId.value ? (onlineStatusMap.value[selectedFriendId.value] ?? false) : false)
 const loadingHistory = computed(() => selectedFriendId.value ? (historyLoadingMap.value[selectedFriendId.value] ?? false) : false)
 const hasMoreHistory = computed(() => selectedFriendId.value ? (conversationHasMoreMap.value[selectedFriendId.value] ?? false) : false)
 
@@ -109,32 +107,6 @@ const emitConversationRead = (friendId: number) => {
   socket.value?.emit('chat:read', { otherUserId: friendId })
 }
 
-const syncPresenceStatus = (userIds: number[]) => {
-  const uniqueUserIds = [...new Set(userIds.filter((userId) => userId > 0))]
-
-  if (!socket.value || !uniqueUserIds.length) {
-    return
-  }
-
-  socket.value.emit(
-    'presence:sync',
-    { userIds: uniqueUserIds },
-    (response: { users?: Array<{ userId: number; online: boolean }> }) => {
-      if (!response?.users) {
-        return
-      }
-
-      const nextStatusMap = { ...onlineStatusMap.value }
-
-      for (const user of response.users) {
-        nextStatusMap[user.userId] = user.online
-      }
-
-      onlineStatusMap.value = nextStatusMap
-    },
-  )
-}
-
 const scrollChatToBottom = async (behavior: ScrollBehavior = 'auto') => {
   await nextTick()
   await chatPanelRef.value?.scrollToBottom(behavior)
@@ -175,7 +147,6 @@ const conversationItems = computed<ConversationItem[]>(() => {
 const uiMessages = computed<UiMessage[]>(() => messages.value.map((message) => {
   const isSelf = message.senderId === currentUser.value?.id
   const targetFriend = friends.value.find((item) => item.friend.id === (isSelf ? message.receiverId : message.senderId))
-  const friendId = isSelf ? message.receiverId : message.senderId
 
   return {
     id: message.id,
@@ -184,7 +155,6 @@ const uiMessages = computed<UiMessage[]>(() => messages.value.map((message) => {
     text: message.content,
     self: isSelf,
     time: formatTime(message.sentAt),
-    online: !isSelf && (onlineStatusMap.value[friendId] ?? false),
     read: Boolean(message.readAt),
   }
 }))
@@ -195,8 +165,6 @@ const loadCurrentUser = async () => {
 
 const loadFriends = async () => {
   friends.value = await fetchFriends()
-
-  syncPresenceStatus(friends.value.map((item) => item.friend.id))
 
   if (selectedFriendId.value && !friends.value.some((item) => item.friend.id === selectedFriendId.value)) {
     selectedFriendId.value = null
@@ -442,13 +410,6 @@ const setupSocket = () => {
     )
   })
 
-  socket.value.on('presence:update', (payload: { userId: number; online: boolean }) => {
-    onlineStatusMap.value = {
-      ...onlineStatusMap.value,
-      [payload.userId]: payload.online,
-    }
-  })
-
   socket.value.on('chat:error', (payload: { message?: string }) => {
     sendError.value = payload.message ?? '聊天连接异常'
   })
@@ -507,7 +468,6 @@ onBeforeUnmount(() => {
       ref="chatPanelRef"
       :current-user="currentUser"
       :selected-friend="selectedFriend"
-      :selected-friend-online="selectedFriendOnline"
       :messages="uiMessages"
       :draft-message="draftMessage"
       :send-error="sendError"

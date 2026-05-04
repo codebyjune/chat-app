@@ -18,19 +18,14 @@ const emit = defineEmits<{
 
 <template>
   <div class="w-full max-w-md rounded-[32px] border p-8" style="border-color: var(--border-color); background: var(--bg-surface); box-shadow: var(--shadow-surface);">
-    <div class="mb-8 flex items-center justify-between gap-4">
+    <div class="mb-8">
       <div>
-        <p class="text-xs uppercase tracking-[0.3em]" style="color: var(--text-muted);">安全登录</p>
         <h1 class="mt-3 text-3xl font-semibold" style="color: var(--text-primary);">
-          欢迎回来
+          登录
         </h1>
         <p class="mt-3 max-w-sm text-sm leading-6" style="color: var(--text-subtle);">
           登录后继续查看消息、保持同步，并从上次离开的地方继续。
         </p>
-      </div>
-
-      <div class="hidden h-14 w-14 items-center justify-center rounded-2xl text-lg font-semibold text-white sm:flex" style="background: var(--accent);">
-        C
       </div>
     </div>
 

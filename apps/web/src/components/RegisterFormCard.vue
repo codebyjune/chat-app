@@ -23,19 +23,14 @@ const emit = defineEmits<{
 
 <template>
   <div class="w-full max-w-md rounded-[32px] border p-8" style="border-color: var(--border-color); background: var(--bg-surface); box-shadow: var(--shadow-surface);">
-    <div class="mb-8 flex items-center justify-between gap-4">
+    <div class="mb-8">
       <div>
-        <p class="text-xs uppercase tracking-[0.3em]" style="color: var(--text-muted);">注册账号</p>
         <h1 class="mt-3 text-3xl font-semibold" style="color: var(--text-primary);">
-          创建新账号
+          注册
         </h1>
         <p class="mt-3 max-w-sm text-sm leading-6" style="color: var(--text-subtle);">
           填写基础信息即可开始使用聊天应用，界面保持简洁清爽。
         </p>
-      </div>
-
-      <div class="hidden h-14 w-14 items-center justify-center rounded-2xl text-lg font-semibold text-white sm:flex" style="background: var(--accent);">
-        C
       </div>
     </div>
 

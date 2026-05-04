@@ -28,9 +28,6 @@ const emit = defineEmits<{
         <h1 class="mt-3 text-3xl font-semibold" style="color: var(--text-primary);">
           注册
         </h1>
-        <p class="mt-3 max-w-sm text-sm leading-6" style="color: var(--text-subtle);">
-          填写基础信息即可开始使用聊天应用，界面保持简洁清爽。
-        </p>
       </div>
     </div>
 

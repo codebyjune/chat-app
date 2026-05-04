@@ -23,9 +23,6 @@ const emit = defineEmits<{
         <h1 class="mt-3 text-3xl font-semibold" style="color: var(--text-primary);">
           登录
         </h1>
-        <p class="mt-3 max-w-sm text-sm leading-6" style="color: var(--text-subtle);">
-          登录后继续查看消息、保持同步，并从上次离开的地方继续。
-        </p>
       </div>
     </div>
 

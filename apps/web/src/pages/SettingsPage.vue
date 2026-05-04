@@ -89,11 +89,7 @@ onMounted(async () => {
       <section class="mx-auto max-w-4xl rounded-[32px] p-6 sm:p-8" style="background: var(--bg-surface); box-shadow: var(--shadow-surface);">
         <div class="flex flex-wrap items-start justify-between gap-4 border-b pb-6" style="border-color: var(--border-color);">
           <div>
-            <p class="text-xs uppercase tracking-[0.3em]" style="color: var(--text-muted);">Profile Settings</p>
             <h1 class="mt-2 text-3xl font-semibold" style="color: var(--text-primary);">设置</h1>
-            <p class="mt-3 max-w-2xl text-sm leading-6" style="color: var(--text-secondary);">
-              你可以在这里更新当前账号的用户名和邮箱。夜间模式开关已经放在左侧栏，可以随时切换整体界面主题。
-            </p>
           </div>
 
           <div class="rounded-3xl px-5 py-4 text-sm" style="background: var(--bg-soft-2); color: var(--text-secondary);">
@@ -102,7 +98,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+        <div class="mt-8">
           <section class="rounded-[28px] border p-5 sm:p-6" style="border-color: var(--border-color); background: var(--bg-surface-muted);">
             <h2 class="text-lg font-semibold" style="color: var(--text-primary);">编辑资料</h2>
             <form class="mt-5 space-y-4" @submit.prevent="handleSaveProfile">
@@ -149,25 +145,6 @@ onMounted(async () => {
                 {{ saving ? '保存中...' : '保存资料' }}
               </button>
             </form>
-          </section>
-
-          <section class="rounded-[28px] border p-5 sm:p-6 text-white" style="border-color: var(--border-color); background: linear-gradient(135deg, #111827 0%, #0f172a 100%);">
-            <p class="text-xs uppercase tracking-[0.25em] text-white/45">Theme</p>
-            <h2 class="mt-3 text-2xl font-semibold">夜间模式已接入</h2>
-            <p class="mt-4 text-sm leading-6 text-white/70">
-              左侧第二个按钮现在可以切换日间与夜间模式。主题选择会保存在本地，下次进入页面时会自动恢复。
-            </p>
-
-            <div class="mt-6 grid gap-3">
-              <div class="rounded-2xl bg-white/8 px-4 py-3">
-                <p class="text-sm font-medium">全局主题切换</p>
-                <p class="mt-1 text-xs text-white/60">已支持浅色与深色模式切换，并对整个应用根节点生效。</p>
-              </div>
-              <div class="rounded-2xl bg-white/8 px-4 py-3">
-                <p class="text-sm font-medium">本地持久化</p>
-                <p class="mt-1 text-xs text-white/60">当前主题会保存到浏览器本地存储，刷新后保持不变。</p>
-              </div>
-            </div>
           </section>
         </div>
       </section>

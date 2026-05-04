@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Socket } from 'socket.io-client'
 import AppSidebar from '../components/AppSidebar.vue'
@@ -40,6 +40,7 @@ const sending = ref(false)
 const loading = ref(false)
 const draftMessage = ref('')
 const socket = ref<Socket | null>(null)
+const chatPanelRef = ref<InstanceType<typeof ChatPanel> | null>(null)
 const conversationMap = ref<Record<number, ChatMessage[]>>({})
 const unreadCountMap = ref<Record<number, number>>({})
 const conversationHasMoreMap = ref<Record<number, boolean>>({})
@@ -108,6 +109,37 @@ const emitConversationRead = (friendId: number) => {
   socket.value?.emit('chat:read', { otherUserId: friendId })
 }
 
+const syncPresenceStatus = (userIds: number[]) => {
+  const uniqueUserIds = [...new Set(userIds.filter((userId) => userId > 0))]
+
+  if (!socket.value || !uniqueUserIds.length) {
+    return
+  }
+
+  socket.value.emit(
+    'presence:sync',
+    { userIds: uniqueUserIds },
+    (response: { users?: Array<{ userId: number; online: boolean }> }) => {
+      if (!response?.users) {
+        return
+      }
+
+      const nextStatusMap = { ...onlineStatusMap.value }
+
+      for (const user of response.users) {
+        nextStatusMap[user.userId] = user.online
+      }
+
+      onlineStatusMap.value = nextStatusMap
+    },
+  )
+}
+
+const scrollChatToBottom = async (behavior: ScrollBehavior = 'auto') => {
+  await nextTick()
+  await chatPanelRef.value?.scrollToBottom(behavior)
+}
+
 const conversationItems = computed<ConversationItem[]>(() => {
   const searchQuery = conversationSearchQuery.value.trim().toLowerCase()
 
@@ -164,6 +196,8 @@ const loadCurrentUser = async () => {
 const loadFriends = async () => {
   friends.value = await fetchFriends()
 
+  syncPresenceStatus(friends.value.map((item) => item.friend.id))
+
   if (selectedFriendId.value && !friends.value.some((item) => item.friend.id === selectedFriendId.value)) {
     selectedFriendId.value = null
     messages.value = []
@@ -201,6 +235,7 @@ const loadConversation = async (friendId: number) => {
     }
     messages.value = conversation
     emitConversationRead(friendId)
+    await scrollChatToBottom()
   } finally {
     historyLoadingMap.value = {
       ...historyLoadingMap.value,
@@ -249,6 +284,7 @@ const handleLoadMoreHistory = async () => {
       [friendId]: olderMessages.length === conversationPageSize,
     }
     messages.value = uniqueConversation
+    await nextTick()
   } catch (error) {
     sendError.value = error instanceof Error ? error.message : '加载更早消息失败'
   } finally {
@@ -392,6 +428,7 @@ const setupSocket = () => {
       }
       messages.value = conversationMap.value[friendId] ?? []
       emitConversationRead(friendId)
+      void scrollChatToBottom('smooth')
     }
   })
 
@@ -467,6 +504,7 @@ onBeforeUnmount(() => {
       @remove-friend="handleRemoveFriend"
     />
     <ChatPanel
+      ref="chatPanelRef"
       :current-user="currentUser"
       :selected-friend="selectedFriend"
       :selected-friend-online="selectedFriendOnline"

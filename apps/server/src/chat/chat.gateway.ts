@@ -149,6 +149,27 @@ export class ChatGateway
     return updatedMessages;
   }
 
+  @SubscribeMessage('presence:sync')
+  handlePresenceSync(
+    @MessageBody() body: { userIds: number[] },
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    if (!client.data.user) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    const userIds = Array.isArray(body?.userIds)
+      ? [...new Set(body.userIds.filter((userId) => Number.isInteger(userId)))]
+      : [];
+
+    return {
+      users: userIds.map((userId) => ({
+        userId,
+        online: this.userSocketCounts.has(userId),
+      })),
+    };
+  }
+
   private extractToken(client: Socket): string {
     const token = client.handshake.auth.token;
 

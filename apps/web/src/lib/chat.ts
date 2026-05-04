@@ -2,6 +2,7 @@ import { io, type Socket } from 'socket.io-client'
 import { getAccessToken } from './auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+const SOCKET_BASE_URL = import.meta.env.VITE_SOCKET_BASE_URL
 const SOCKET_PATH = import.meta.env.VITE_SOCKET_PATH ?? '/socket.io'
 
 type ApiErrorPayload = {
@@ -144,7 +145,11 @@ export const createChatSocket = () => {
     throw new Error('未登录')
   }
 
-  return io(API_BASE_URL, {
+  const resolvedSocketBaseUrl =
+    SOCKET_BASE_URL ??
+    (typeof window !== 'undefined' ? window.location.origin : API_BASE_URL)
+
+  return io(resolvedSocketBaseUrl, {
     path: SOCKET_PATH,
     auth: {
       token,

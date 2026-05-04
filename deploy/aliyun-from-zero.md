@@ -295,6 +295,7 @@ cat > .env.production <<'EOF'
 VITE_APP_BASE_PATH=/chat/
 VITE_ROUTER_BASE_PATH=/chat/
 VITE_API_BASE_URL=http://你的服务器IP/chat-api
+VITE_SOCKET_BASE_URL=http://你的服务器IP
 VITE_SOCKET_PATH=/chat-api/socket.io
 EOF
 ```
@@ -308,6 +309,7 @@ cat > .env.production <<'EOF'
 VITE_APP_BASE_PATH=/chat/
 VITE_ROUTER_BASE_PATH=/chat/
 VITE_API_BASE_URL=http://47.xx.xx.xx/chat-api
+VITE_SOCKET_BASE_URL=http://47.xx.xx.xx
 VITE_SOCKET_PATH=/chat-api/socket.io
 EOF
 ```
@@ -518,7 +520,8 @@ psql -h 127.0.0.1 -U chat_user -d chat_backend
 
 检查：
 
-1. `VITE_SOCKET_PATH=/chat-api/socket.io`
+1. `VITE_SOCKET_BASE_URL=http://你的服务器IP`
+2. `VITE_SOCKET_PATH=/chat-api/socket.io`
 2. Nginx 是否有 `/chat-api/socket.io/` 代理
 3. 后端是否正常运行在 `3001`
 
